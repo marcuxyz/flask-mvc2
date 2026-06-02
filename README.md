@@ -44,7 +44,7 @@ pip install flask_mvc
 ### Using Poetry
 
 ```bash
-poetry add flask_mvc
+poetry add flask-mvc2
 ```
 
 ### Development Installation
