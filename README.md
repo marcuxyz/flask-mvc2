@@ -38,7 +38,7 @@
 ### Using pip
 
 ```bash
-pip install flask_mvc
+pip install flask-mvc2
 ```
 
 ### Using Poetry
