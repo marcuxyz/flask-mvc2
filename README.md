@@ -41,10 +41,10 @@
 pip install flask-mvc2
 ```
 
-### Using Poetry
+### Using UV
 
 ```bash
-poetry add flask-mvc2
+uv add flask-mvc2
 ```
 
 ### Development Installation
@@ -52,7 +52,7 @@ poetry add flask-mvc2
 ```bash
 git clone https://github.com/marcuxyz/flask-mvc.git
 cd flask_mvc
-poetry install
+uv sync
 ```
 
 ## 🏃‍♂️ Quick Start
@@ -290,17 +290,17 @@ git clone https://github.com/marcuxyz/flask-mvc.git
 cd flask_mvc
 
 # Install dependencies
-poetry install
+uv sync
 
 # Run tests
-poetry run pytest
+uv run pytest
 
 # Run linting
-poetry run black .
-poetry run flake8
+uv run black .
+uv run flake8
 
 # Build documentation
-poetry run mkdocs serve
+uv run mkdocs serve
 ```
 
 ### Reporting Issues
