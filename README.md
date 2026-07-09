@@ -310,7 +310,7 @@ uv run mkdocs serve
 
 ## 📋 Requirements
 
-- **Python**: 3.10+
+- **Python**: 3.12+
 - **Flask**: 3.0+
 - **Click**: 8.0+ (included with Flask)
 - **Jinja2**: 3.0+ (included with Flask)
