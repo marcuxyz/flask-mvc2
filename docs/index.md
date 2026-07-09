@@ -20,10 +20,10 @@ Install Flask MVC using pip:
 $ pip install flaskmvc
 ```
 
-Install Flask MVC using poetry:
+Install Flask MVC using UV:
 
 ```shell
-$ poetry add flaskmvc
+$ uv add flaskmvc
 ```
 
 Now, let's get started:
