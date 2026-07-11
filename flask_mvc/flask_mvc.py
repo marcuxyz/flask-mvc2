@@ -3,7 +3,7 @@ from method_override.wsgi_method_override import MethodOverrideMiddleware
 
 from . import cli
 from .middlewares.input_method_helper import InputMethodHelper
-from .middlewares.blueprint_middleware import BlueprintMiddleware
+from .middlewares.blueprint_binding import BlueprintBinding
 from .middlewares.router_middleware import RouterMiddleware as Router
 
 
@@ -29,7 +29,7 @@ class FlaskMVC:
         app.wsgi_app = MethodOverrideMiddleware(app.wsgi_app)
 
     def _configure_blueprint_middleware(self, app, path):
-        BlueprintMiddleware(app, path).register()
+        BlueprintBinding(app, path).register()
 
     def _inject_object_in_jinja_template(self, app):
         @app.context_processor

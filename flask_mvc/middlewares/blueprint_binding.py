@@ -8,7 +8,7 @@ from .callback_middleware import CallbackMiddleware
 from .router_middleware import RouterMiddleware as Router
 
 
-class BlueprintMiddleware:
+class BlueprintBinding:
     def __init__(self, app: Flask, path: str) -> None:
         self.app = app
         self.path = path
