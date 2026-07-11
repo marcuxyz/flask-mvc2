@@ -1,7 +1,7 @@
 from flask import Flask, request
 
 
-class CallbackMiddleware:
+class Callback:
     def __init__(self, app: Flask, controller_name: str, controller) -> None:
         """
         Initializes the CallbackMiddleware instance.

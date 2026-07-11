@@ -5,7 +5,7 @@ Comprehensive tests for Flask MVC callback middleware system.
 import pytest
 from flask import Response, request, url_for
 
-from flask_mvc.middlewares.callback_middleware import CallbackMiddleware
+from flask_mvc.middlewares.callback import Callback as CallbackMiddleware
 from tests.app.controllers.callbacks_controller import CallbacksController
 
 # Callback Middleware Tests

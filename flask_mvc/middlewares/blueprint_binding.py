@@ -4,7 +4,7 @@ from importlib import import_module, reload
 from flask import Flask
 from flask.blueprints import Blueprint
 
-from .callback_middleware import CallbackMiddleware
+from .callback import Callback as CallbackMiddleware
 from .router_middleware import RouterMiddleware as Router
 
 
