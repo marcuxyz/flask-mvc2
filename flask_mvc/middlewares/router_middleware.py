@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from .namespace_middleware import NamespaceMiddleware
+from .namespace import Namespace
 
 Model = namedtuple("Model", "method path controller action")
 
@@ -69,10 +69,10 @@ class RouterMiddleware:
             name (str): The name of the namespace.
 
         Returns:
-            NamespaceMiddleware: An instance of NamespaceMiddleware associated with the given name.
+            Namespace: An instance of Namespace associated with the given name.
         """
 
-        return NamespaceMiddleware(name, RouterMiddleware)
+        return Namespace(name, RouterMiddleware)
 
     @staticmethod
     def get(path: str, resource: str):
