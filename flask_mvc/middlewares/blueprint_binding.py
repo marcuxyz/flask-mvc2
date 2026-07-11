@@ -1,11 +1,17 @@
 import sys
 from importlib import import_module, reload
+import logging
 
 from flask import Flask
 from flask.blueprints import Blueprint
 
+from flask_mvc.core.exceptions import RoutesModuleNotFoundError
+
 from .callback import Callback as CallbackMiddleware
 from .router import Router
+
+
+logger = logging.getLogger(__name__)
 
 
 class BlueprintBinding:
@@ -20,7 +26,14 @@ class BlueprintBinding:
         if routes_module in sys.modules:
             reload(sys.modules[routes_module])
         else:
-            import_module(routes_module)
+            try:
+                import_module(routes_module)
+            except ModuleNotFoundError as exc:
+                error_message = (
+                    "Routes module not found. Please create the 'routes.py'"
+                    "file in the specified path. \n\nE.g: app/routes.py"
+                )
+                raise RoutesModuleNotFoundError(error_message) from exc
 
     def register(self):
         for route in Router._method_route().items():
