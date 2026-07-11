@@ -1,6 +1,6 @@
 [project]
 name = "flask-mvc2"
-version = "0.2.0"
+version = "0.2.2"
 description = "Transform Flask into a structured MVC architecture with powerful CLI tools"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
