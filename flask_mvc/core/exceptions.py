@@ -23,3 +23,9 @@ class InvalidControllerNameError(FlaskMVCError):
     """Exception raised when controller name is invalid."""
 
     pass
+
+
+class RoutesModuleNotFoundError(FlaskMVCError):
+    """Exception raised when routes module cannot be imported."""
+
+    pass
