@@ -2,9 +2,9 @@ from flask import Flask
 from method_override.wsgi_method_override import MethodOverrideMiddleware
 
 from . import cli
-from .helpers.html.input_method_helper import InputMethodHelper
-from .middlewares.blueprint_middleware import BlueprintMiddleware
-from .middlewares.http.router_middleware import RouterMiddleware as Router
+from .middlewares.html_input_method_helper import HTMLInputMethodHelper
+from .middlewares.blueprint_binding import BlueprintBinding
+from .middlewares.router import Router
 
 
 class FlaskMVC:
@@ -29,13 +29,13 @@ class FlaskMVC:
         app.wsgi_app = MethodOverrideMiddleware(app.wsgi_app)
 
     def _configure_blueprint_middleware(self, app, path):
-        BlueprintMiddleware(app, path).register()
+        BlueprintBinding(app, path).register()
 
     def _inject_object_in_jinja_template(self, app):
         @app.context_processor
         def inject_stage_and_region():
             return {
-                "method": InputMethodHelper().input_hidden_method,
+                "method": HTMLInputMethodHelper().input_hidden_method,
             }
 
     def _configure_cli_commands(self, app):

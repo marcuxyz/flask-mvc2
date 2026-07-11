@@ -1,7 +1,7 @@
 import markupsafe
 
 
-class InputMethodHelper:
+class HTMLInputMethodHelper:
     """
     A middleware class for handling HTML-related operations, specifically for creating hidden input fields
     with specific methods (like PUT and DELETE) that are not natively supported by HTML forms.
