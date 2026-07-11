@@ -1,5 +1,5 @@
 [project]
-name = "FlaskMVC"
+name = "flask-mvc2"
 version = "0.2.0"
 description = "Transform Flask into a structured MVC architecture with powerful CLI tools"
 readme = "README.md"
