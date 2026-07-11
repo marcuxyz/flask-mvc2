@@ -1,10 +1,11 @@
-from importlib import import_module
+import sys
+from importlib import import_module, reload
 
 from flask import Flask
 from flask.blueprints import Blueprint
 
 from .callback_middleware import CallbackMiddleware
-from .http.router_middleware import RouterMiddleware as Router
+from .router_middleware import RouterMiddleware as Router
 
 
 class BlueprintMiddleware:
@@ -13,7 +14,13 @@ class BlueprintMiddleware:
         self.path = path
 
         # load routes defined from users
-        import_module(f"{self.path}.routes")
+        Router.ROUTES.clear()
+        routes_module = f"{self.path}.routes"
+
+        if routes_module in sys.modules:
+            reload(sys.modules[routes_module])
+        else:
+            import_module(routes_module)
 
     def register(self):
         for route in Router._method_route().items():

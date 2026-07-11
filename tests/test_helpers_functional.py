@@ -8,7 +8,7 @@ import markupsafe
 import pytest
 from flask import render_template_string, url_for
 
-from flask_mvc.helpers.html.input_method_helper import InputMethodHelper
+from flask_mvc.middlewares.input_method_helper import InputMethodHelper
 from tests.app.models.message import Message
 
 # Input Method Helper Tests

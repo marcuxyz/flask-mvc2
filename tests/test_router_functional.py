@@ -8,7 +8,7 @@ import pytest
 from flask import url_for
 
 from flask_mvc import Router
-from flask_mvc.middlewares.http.router_middleware import RouterMiddleware
+from flask_mvc.middlewares.router_middleware import RouterMiddleware
 
 # Router System Tests
 
