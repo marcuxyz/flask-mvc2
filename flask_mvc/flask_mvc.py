@@ -2,7 +2,7 @@ from flask import Flask
 from method_override.wsgi_method_override import MethodOverrideMiddleware
 
 from . import cli
-from .middlewares.input_method_helper import InputMethodHelper
+from .middlewares.html_input_method_helper import HTMLInputMethodHelper
 from .middlewares.blueprint_binding import BlueprintBinding
 from .middlewares.router_middleware import RouterMiddleware as Router
 
@@ -35,7 +35,7 @@ class FlaskMVC:
         @app.context_processor
         def inject_stage_and_region():
             return {
-                "method": InputMethodHelper().input_hidden_method,
+                "method": HTMLInputMethodHelper().input_hidden_method,
             }
 
     def _configure_cli_commands(self, app):

@@ -8,7 +8,7 @@ import markupsafe
 import pytest
 from flask import render_template_string, url_for
 
-from flask_mvc.middlewares.input_method_helper import InputMethodHelper
+from flask_mvc.middlewares.html_input_method_helper import HTMLInputMethodHelper
 from tests.app.models.message import Message
 
 # Input Method Helper Tests
@@ -16,7 +16,7 @@ from tests.app.models.message import Message
 
 def test_put_method_html_generation():
     """Test PUT method hidden input generation."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result = helper._put()
     expected = "<input type='hidden' name='_method' value=PUT>"
 
@@ -25,7 +25,7 @@ def test_put_method_html_generation():
 
 def test_delete_method_html_generation():
     """Test DELETE method hidden input generation."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result = helper._delete()
     expected = "<input type='hidden' name='_method' value=DELETE>"
 
@@ -34,7 +34,7 @@ def test_delete_method_html_generation():
 
 def test_input_html_generic_method():
     """Test generic input HTML generation."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result = helper._input_html("PATCH")
     expected = "<input type='hidden' name='_method' value=PATCH>"
 
@@ -43,7 +43,7 @@ def test_input_html_generic_method():
 
 def test_input_hidden_method_put():
     """Test input_hidden_method with PUT."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result = helper.input_hidden_method("PUT")
     expected_html = "<input type='hidden' name='_method' value=PUT>"
 
@@ -53,7 +53,7 @@ def test_input_hidden_method_put():
 
 def test_input_hidden_method_delete():
     """Test input_hidden_method with DELETE."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result = helper.input_hidden_method("DELETE")
     expected_html = "<input type='hidden' name='_method' value=DELETE>"
 
@@ -63,7 +63,7 @@ def test_input_hidden_method_delete():
 
 def test_input_hidden_method_case_insensitive():
     """Test that method parameter is case insensitive."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result_lower = helper.input_hidden_method("put")
     result_upper = helper.input_hidden_method("PUT")
     result_mixed = helper.input_hidden_method("Put")
@@ -77,14 +77,14 @@ def test_input_hidden_method_case_insensitive():
 
 def test_input_hidden_method_invalid_method():
     """Test input_hidden_method with invalid method."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     with pytest.raises(KeyError):
         helper.input_hidden_method("INVALID")
 
 
 def test_markup_safety():
     """Test that returned markup is safe for template rendering."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
     result = helper.input_hidden_method("put")
 
     assert isinstance(result, markupsafe.Markup)
@@ -269,7 +269,7 @@ def test_multiple_helper_calls_in_template(client):
 
 def test_helper_function_performance():
     """Test that helper functions perform well with multiple calls."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
 
     start_time = time.time()
 
@@ -285,7 +285,7 @@ def test_helper_function_performance():
 
 def test_markup_object_reuse():
     """Test that Markup objects are created efficiently."""
-    helper = InputMethodHelper()
+    helper = HTMLInputMethodHelper()
 
     result1 = helper.input_hidden_method("put")
     result2 = helper.input_hidden_method("put")
