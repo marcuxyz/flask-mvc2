@@ -4,11 +4,11 @@ from importlib import import_module, reload
 from flask import Flask
 from flask.blueprints import Blueprint
 
-from .callback import Callback as CallbackMiddleware
-from .router import Router
+from .callback import CallbackMiddleware
+from .router import RouterMiddleware as Router
 
 
-class BlueprintBinding:
+class BlueprintMiddleware:
     def __init__(self, app: Flask, path: str) -> None:
         self.app = app
         self.path = path

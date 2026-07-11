@@ -4,7 +4,7 @@ from method_override.wsgi_method_override import MethodOverrideMiddleware
 from . import cli
 from .middlewares.html_input_method_helper import HTMLInputMethodHelper
 from .middlewares.blueprint_binding import BlueprintBinding
-from .middlewares.router_middleware import RouterMiddleware as Router
+from .middlewares.router import Router
 
 
 class FlaskMVC:

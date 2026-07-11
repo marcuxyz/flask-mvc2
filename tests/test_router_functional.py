@@ -8,7 +8,7 @@ import pytest
 from flask import url_for
 
 from flask_mvc import Router
-from flask_mvc.middlewares.router_middleware import RouterMiddleware
+from flask_mvc.middlewares.router import Router
 
 # Router System Tests
 
@@ -131,10 +131,10 @@ def test_namespace_endpoint_naming(client):
 
 def test_get_route_registration():
     """Test GET route registration."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.get("/test", "test#index")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert "test" in routes
     assert routes["test"][0].method == ["GET"]
     assert routes["test"][0].path == "/test"
@@ -143,10 +143,10 @@ def test_get_route_registration():
 
 def test_post_route_registration():
     """Test POST route registration."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.post("/test", "test#create")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert "test" in routes
     assert routes["test"][0].method == ["POST"]
     assert routes["test"][0].action == "create"
@@ -154,10 +154,10 @@ def test_post_route_registration():
 
 def test_put_route_registration():
     """Test PUT route registration."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.put("/test/<id>", "test#update")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert "test" in routes
     assert routes["test"][0].method == ["PUT", "PATCH"]
     assert routes["test"][0].action == "update"
@@ -165,10 +165,10 @@ def test_put_route_registration():
 
 def test_delete_route_registration():
     """Test DELETE route registration."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.delete("/test/<id>", "test#destroy")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert "test" in routes
     assert routes["test"][0].method == ["DELETE"]
     assert routes["test"][0].action == "destroy"
@@ -176,10 +176,10 @@ def test_delete_route_registration():
 
 def test_all_routes_registration():
     """Test that Router.all() creates all RESTful routes."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.all("products")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert "products" in routes
 
     assert len(routes["products"]) == 7
@@ -191,10 +191,10 @@ def test_all_routes_registration():
 
 def test_all_routes_with_only_filter():
     """Test Router.all() with only parameter."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.all("products", only="index show")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert "products" in routes
     assert len(routes["products"]) == 2
 
@@ -207,31 +207,31 @@ def test_all_routes_with_only_filter():
 
 def test_multiple_routes_same_controller():
     """Test multiple routes for the same controller."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     Router.get("/users", "users#index")
     Router.get("/users/active", "users#active")
     Router.post("/users", "users#create")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert len(routes["users"]) == 3
 
 
 def test_namespace_path_concatenation():
     """Test that namespace paths are properly concatenated."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     api = Router.namespace("/api")
     api.get("/test", "test#index")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert routes["test"][0].path == "/api/test"
 
 
 def test_nested_namespace_paths():
     """Test deeply nested namespace paths."""
-    RouterMiddleware.ROUTES.clear()
+    Router.ROUTES.clear()
     api = Router.namespace("/api")
     v1 = api.namespace("/v1")
     v1.get("/test", "test#index")
 
-    routes = RouterMiddleware._method_route()
+    routes = Router._method_route()
     assert routes["test"][0].path == "/api/v1/test"
