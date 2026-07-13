@@ -255,8 +255,8 @@ Flask MVC is built with testing in mind:
 
 ```python
 import pytest
-from flask_mvc.commands.controller_generator import ControllerGenerator
-from flask_mvc.commands.exceptions import InvalidControllerNameError
+from flask_mvc.command.controller.generator import Generator as ControllerGenerator
+from flask_mvc.command.exceptions import InvalidControllerNameError
 
 def test_controller_generation():
     generator = ControllerGenerator()
