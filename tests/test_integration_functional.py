@@ -4,9 +4,7 @@ Integration tests for Flask MVC - testing complete workflows and interactions.
 
 import gc
 import json
-import threading
 
-import pytest
 from flask import Flask, url_for
 
 from tests.app import db
@@ -296,7 +294,6 @@ def test_custom_template_folder_integration():
 
     app = Flask(__name__)
     app.config["TESTING"] = True
-
-    mvc = FlaskMVC(app, path="tests.app")
+    FlaskMVC(app, path="tests.app")
 
     assert app.template_folder == "views"
