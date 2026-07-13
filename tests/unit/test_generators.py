@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch, mock_open
 import tempfile
 import shutil
 
-from flask_mvc.core.generators import ControllerGenerator
+from flask_mvc.core.controller_generator import ControllerGenerator
 from flask_mvc.core.exceptions import (
     ControllerGenerationError,
     InvalidControllerNameError,
@@ -48,7 +48,7 @@ class TestControllerGenerator:
         assert generator.name_utils is not None
         assert generator.config is not None
 
-    @patch("flask_mvc.core.generators.CLIConfig.get_templates_dir")
+    @patch("flask_mvc.core.controller_generator.CLIConfig.get_templates_dir")
     def test_init_without_templates_dir(self, mock_get_templates_dir):
         """Test ControllerGenerator initialization with default templates directory."""
         mock_get_templates_dir.return_value = self.templates_dir
@@ -105,7 +105,7 @@ class TestControllerGenerator:
                 expected_path, "class TestController:\n    pass"
             )
 
-    @patch("flask_mvc.core.generators.CLIConfig.get_controllers_path")
+    @patch("flask_mvc.core.controller_generator.CLIConfig.get_controllers_path")
     def test_generate_controller_default_path(self, mock_get_path):
         """Test controller generation with default output path."""
         mock_get_path.return_value = "app/controllers"
