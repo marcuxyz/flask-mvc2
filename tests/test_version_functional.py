@@ -31,7 +31,7 @@ def test_version_format():
 
 def test_current_version_value():
     """Test the current version value."""
-    assert __version__ == "0.3.1"
+    assert __version__ == "0.4.0"
 
 
 def test_version_components():
