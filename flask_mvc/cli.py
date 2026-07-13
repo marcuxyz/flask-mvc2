@@ -9,12 +9,12 @@ import logging
 import click
 from flask.cli import with_appcontext
 
-from .commands.config import CLIConfig
-from .commands.exceptions import (
+from .command.config import CLIConfig
+from .command.exceptions import (
     ControllerGenerationError,
     InvalidControllerNameError,
 )
-from .commands.controller.generator import Generator as ControllerGenerator
+from .command.controller.generator import Generator as ControllerGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

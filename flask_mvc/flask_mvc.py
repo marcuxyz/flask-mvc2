@@ -1,7 +1,7 @@
 from flask import Flask
 from method_override.wsgi_method_override import MethodOverrideMiddleware
 
-from . import command
+from . import cli
 from .middlewares.html_input_method_helper import HTMLInputMethodHelper
 from .middlewares.blueprint_binding import BlueprintBinding
 from .middlewares.router import Router
@@ -40,4 +40,4 @@ class FlaskMVC:
 
     def _configure_cli_commands(self, app):
         """Register CLI commands with the Flask app."""
-        command.init_app(app)
+        cli.init_app(app)
