@@ -14,7 +14,7 @@ from .commands.exceptions import (
     ControllerGenerationError,
     InvalidControllerNameError,
 )
-from .commands.controller_generator import ControllerGenerator
+from .commands.controller.generator import Generator as ControllerGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
