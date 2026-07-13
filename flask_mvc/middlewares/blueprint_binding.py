@@ -4,7 +4,7 @@ from importlib import import_module, reload
 from flask import Flask
 from flask.blueprints import Blueprint
 
-from flask_mvc.core.exceptions import RoutesModuleNotFoundError
+from flask_mvc.command.exceptions import RoutesModuleNotFoundError
 
 from .callback import Callback as CallbackMiddleware
 from .router import Router

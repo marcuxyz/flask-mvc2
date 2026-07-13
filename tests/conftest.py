@@ -2,9 +2,6 @@
 Comprehensive test configuration with improved fixtures and utilities.
 """
 
-import os
-import tempfile
-
 import pytest
 from splinter import Browser
 

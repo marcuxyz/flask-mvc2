@@ -242,7 +242,7 @@ export FLASK_MVC_FILE_ENCODING="utf-8"
 ### Programmatic Configuration
 
 ```python
-from flask_mvc.core.config import CLIConfig
+from flask_mvc.commands.config import CLIConfig
 
 # Override default settings
 CLIConfig.DEFAULT_CONTROLLERS_PATH = "src/controllers"
@@ -255,8 +255,8 @@ Flask MVC is built with testing in mind:
 
 ```python
 import pytest
-from flask_mvc.core.generators import ControllerGenerator
-from flask_mvc.core.exceptions import InvalidControllerNameError
+from flask_mvc.command.controller.generator import Generator as ControllerGenerator
+from flask_mvc.command.exceptions import InvalidControllerNameError
 
 def test_controller_generation():
     generator = ControllerGenerator()

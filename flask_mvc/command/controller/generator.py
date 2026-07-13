@@ -3,14 +3,14 @@
 from pathlib import Path
 from typing import Optional
 
-from .config import CLIConfig
-from .exceptions import ControllerGenerationError, InvalidControllerNameError
-from .file_handler import FileHandler
-from .name_utils import NameUtils
-from .template_renderer import TemplateRenderer
+from ..config import CLIConfig
+from ..exceptions import ControllerGenerationError, InvalidControllerNameError
+from ..file_handler import FileHandler
+from ..name_utils import NameUtils
+from ..template_renderer import TemplateRenderer
 
 
-class ControllerGenerator:
+class Generator:
     """Generates controller files using templates."""
 
     def __init__(self, templates_dir: Optional[Path] = None):
