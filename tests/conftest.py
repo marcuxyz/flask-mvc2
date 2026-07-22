@@ -5,7 +5,7 @@ Comprehensive test configuration with improved fixtures and utilities.
 import pytest
 from splinter import Browser
 
-from flask_mvc.middlewares.base_model import ReflectedModel
+from flask_mvc.middlewares.base_model import BaseModel
 from tests.app import create_app, db
 from tests.app.models.message import Message
 
@@ -34,7 +34,7 @@ def client(app):
     """Create test client with database setup."""
     with app.app_context():
         db.create_all()
-        ReflectedModel.prepare(db.engine)
+        BaseModel.prepare(db.engine)
 
         # Create sample data
         sample_message = Message(title="Message One")
@@ -53,7 +53,7 @@ def empty_client(app):
     """Create test client without sample data."""
     with app.app_context():
         db.create_all()
-        ReflectedModel.prepare(db.engine)
+        BaseModel.prepare(db.engine)
 
         with app.test_client() as test_client:
             yield test_client
@@ -67,7 +67,7 @@ def browser(app):
     """Create browser for integration testing."""
     with app.app_context():
         db.create_all()
-        ReflectedModel.prepare(db.engine)
+        BaseModel.prepare(db.engine)
 
         # Create sample data
         sample_message = Message(title="Message One")
@@ -87,7 +87,7 @@ def empty_browser(app):
     """Create browser without sample data."""
     with app.app_context():
         db.create_all()
-        ReflectedModel.prepare(db.engine)
+        BaseModel.prepare(db.engine)
         browser = Browser("flask", app=app)
         yield browser
         browser.quit()
@@ -100,7 +100,7 @@ def sample_messages(app):
     """Create multiple sample messages for testing."""
     with app.app_context():
         db.create_all()
-        ReflectedModel.prepare(db.engine)
+        BaseModel.prepare(db.engine)
 
         messages = [
             Message(title="First Message"),

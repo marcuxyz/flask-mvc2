@@ -8,6 +8,7 @@ from .middlewares.blueprint_binding import BlueprintBinding
 from .middlewares.router import Router
 from .middlewares.base_model import FlaskReflection
 
+
 class FlaskMVC:
     def __init__(self, app: Flask = None, path="app", db: SQLAlchemy = None):
         if app is not None:
