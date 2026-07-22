@@ -30,7 +30,8 @@
 - **🔧 Flexible Configuration**: Customizable paths and settings via environment variables
 - **📝 Type Safety**: Full type hints support for better development experience
 - **🧪 Testing Ready**: Built-in support for testing with comprehensive error handling
-- **📖 Auto Documentation**: Generated code includes professional docstrings
+- **� SQLAlchemy Introspection**: Deferred model reflection support via `ReflectedModel` and `FlaskReflection`, allowing models to map table schemas dynamically without explicit field declarations.
+- **�📖 Auto Documentation**: Generated code includes professional docstrings
 - **🌐 API & Web Support**: Content negotiation for both web and API responses
 
 ## 📦 Installation
@@ -75,18 +76,40 @@ if __name__ == "__main__":
 ```python
 from flask import Flask
 from flask_mvc import FlaskMVC
+from flask_sqlalchemy import SQLAlchemy
 
 mvc = FlaskMVC()
+db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
 
-    # Initialize MVC extension
+    db.init_app(app)
     mvc.init_app(app, path='src')  # Custom path (default: 'app')
 
     return app
 
 app = create_app()
+```
+
+### SQLAlchemy Introspection Support
+
+Flask MVC now includes Rails-like SQLAlchemy introspection support. With `ReflectedModel` and `FlaskReflection`, you can define a model that only declares `__tablename__` while the extension discovers table columns at runtime.
+
+```python
+from flask_mvc.middlewares.base_model import ReflectedModel
+from tests.app import db
+
+class Message(ReflectedModel, db.Model):
+    __tablename__ = 'messages'
+```
+
+This feature works best when the database extension is initialized before Flask MVC:
+
+```python
+db.init_app(app)
+FlaskMVC(app, path='app', db=db)
 ```
 
 ### Generate Your First Controller
