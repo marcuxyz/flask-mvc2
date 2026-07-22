@@ -57,7 +57,38 @@ Flask MVC builds on provides the best architecture experience for Flask, and giv
 - You can separate routes of business rules
 - You can use the before_action to execute a specific code
 - You can integrate with other extensions of Flask, Flask-SQLAlchemy, Flask-Migrate, etc.
+- **SQLAlchemy Introspection**: deferred model reflection support with `ReflectedModel` and `FlaskReflection` for runtime schema discovery.
 
 ## Dependencies
 
 Flask MVC just depends on the Flask extensions to working and requires Python >=3.8.0,<4.0.0.
+
+## SQLAlchemy Introspection
+
+This extension now supports deferred SQLAlchemy reflection for models. By inheriting from `ReflectedModel` and using the `FlaskReflection` integration, models can map to existing database tables without declaring every column in the model class.
+
+Example:
+
+```python
+from flask_mvc.middlewares.base_model import ReflectedModel
+from tests.app import db
+
+class Message(ReflectedModel, db.Model):
+    __tablename__ = 'messages'
+```
+
+Initialize the database extension before Flask MVC so introspection works correctly:
+
+```python
+from flask import Flask
+from flask_mvc import FlaskMVC
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
+
+db.init_app(app)
+FlaskMVC(app, path='app', db=db)
+```
