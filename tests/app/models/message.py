@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Table
 
-from flask_mvc.middlewares.base_model import BaseModel
+from flask_mvc.model import BaseModel
 from tests.app import db
 
 messages_table = Table(

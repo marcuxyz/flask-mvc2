@@ -1,115 +1,65 @@
-"""Flask MVC CLI commands for generating MVC components.
+"""``flask mvc generate controller <name>``"""
 
-This module provides command-line tools for scaffolding MVC components
-following Flask and Python best practices.
-"""
-
-import logging
+import re
+from pathlib import Path
 
 import click
-from flask.cli import with_appcontext
+from flask import current_app
+from flask.cli import AppGroup
+from jinja2 import Environment, PackageLoader
 
-from .command.config import CLIConfig
-from .command.exceptions import (
-    ControllerGenerationError,
-    InvalidControllerNameError,
-)
-from .command.controller.generator import Generator as ControllerGenerator
+from .router import controller_class_name
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-@click.group()
-def mvc():
-    """Flask MVC commands."""
-    pass
+mvc = AppGroup("mvc", help="Flask MVC commands.")
 
 
 @mvc.group()
 def generate():
     """Generate MVC components."""
-    pass
 
 
 @generate.command()
 @click.argument("name")
 @click.option(
-    "--path",
-    "-p",
-    default=CLIConfig.DEFAULT_CONTROLLERS_PATH,
-    help="Path where to create the controller",
+    "--path", "-p", help="Where to create it (default: <app path>/controllers)."
 )
-@click.option("--force", "-f", is_flag=True, help="Overwrite existing controller file")
-@with_appcontext
-def controller(name: str, path: str, force: bool) -> None:
-    """Generate a new controller.
+@click.option("--force", "-f", is_flag=True, help="Overwrite an existing controller.")
+def controller(name: str, path: str | None, force: bool) -> None:
+    """Generate a controller with the seven RESTful actions.
 
-    Creates a new controller class with RESTful methods following Flask MVC patterns.
-    The controller will include standard CRUD operations and proper type hints.
-
-    Examples:
-        \b
-        flask mvc generate controller home
-        flask mvc generate controller user --path custom/controllers
-        flask mvc generate controller api_v1_user --force
+    \b
+    flask mvc generate controller home
+    flask mvc generate controller api_v1_user --path custom/controllers
     """
-    try:
-        logger.info(f"Generating controller '{name}' at path '{path}'")
-
-        generator = ControllerGenerator()
-        controller_file = generator.generate(name, path, force=force)
-
-        click.echo(
-            click.style(
-                f"✓ Controller created successfully at {controller_file}",
-                fg=CLIConfig.SUCCESS_COLOR,
-            )
+    if not re.fullmatch(r"[a-zA-Z]\w*", name):
+        raise click.BadParameter(
+            "must start with a letter and contain only letters, numbers and underscores",
+            param_hint="NAME",
         )
 
-        # Provide helpful next steps
-        controller_name = name if name.endswith("_controller") else f"{name}_controller"
-        click.echo(click.style("\nNext steps:", fg=CLIConfig.INFO_COLOR, bold=True))
-        click.echo(
-            click.style(
-                "1. Add routes for your controller in your routes.py file",
-                fg=CLIConfig.INFO_COLOR,
-            )
-        )
-        click.echo(
-            click.style(
-                f"2. Create templates in views/{name}/ directory",
-                fg=CLIConfig.INFO_COLOR,
-            )
-        )
-        click.echo(
-            click.style(
-                f"3. Implement your business logic in {controller_name}.py",
-                fg=CLIConfig.INFO_COLOR,
-            )
-        )
+    resource = name.removesuffix("_controller")
+    app_package = current_app.extensions["mvc"]["path"]  # "app", "src", "tests.app"...
+    directory = Path(path) if path else Path(*app_package.split("."), "controllers")
+    target = directory / f"{resource}_controller.py"
 
-    except (ControllerGenerationError, InvalidControllerNameError) as e:
-        logger.error(f"Controller generation failed: {e}")
-        click.echo(click.style(f"✗ Error: {e}", fg=CLIConfig.ERROR_COLOR), err=True)
-        raise click.Abort() from e
-    except Exception as e:
-        logger.exception(f"Unexpected error during controller generation: {e}")
-        click.echo(
-            click.style(
-                f"✗ Unexpected error: {e}. Please check the logs for more details.",
-                fg=CLIConfig.ERROR_COLOR,
-            ),
-            err=True,
-        )
-        raise click.Abort() from e
+    if target.exists() and not force:
+        raise click.ClickException(f"{target} already exists. Use --force to overwrite.")
 
+    # Autoescape is disabled because the generated output is Python code, not HTML.
+    env = Environment(  # nosec B701
+        loader=PackageLoader("flask_mvc", "templates"),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        keep_trailing_newline=True,
+    )
+    code = env.get_template("controller.py.jinja2").render(
+        resource=resource, class_name=controller_class_name(resource)
+    )
 
-def init_app(app) -> None:
-    """Initialize CLI commands with Flask app.
+    directory.mkdir(parents=True, exist_ok=True)
+    target.write_text(code, encoding="utf-8")
 
-    Args:
-        app: Flask application instance
-    """
-    app.cli.add_command(mvc)
+    click.secho(f"✓ Controller created at {target}", fg="green")
+    click.echo(
+        f"Next: add `Router.all({resource!r})` to routes.py and create views/{resource}/."
+    )
