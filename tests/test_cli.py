@@ -88,9 +88,7 @@ def test_generated_multiword_controller_is_loadable(tmp_path, monkeypatch):
     (package / "controllers").mkdir(parents=True)
     (package / "__init__.py").write_text("")
     (package / "controllers" / "__init__.py").write_text("")
-    (package / "routes.py").write_text(
-        "from flask_mvc import Router\n"
-    )  # no routes yet
+    (package / "routes.py").write_text("from flask_mvc import Router\n")  # no routes yet
     monkeypatch.syspath_prepend(str(tmp_path))
     app = Flask(__name__)
     FlaskMVC(app, path="rt_app")  # registers the command and reads the path
