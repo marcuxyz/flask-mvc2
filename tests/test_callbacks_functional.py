@@ -1,14 +1,28 @@
 """
-Comprehensive tests for Flask MVC callback middleware system.
+Tests for controller callbacks (before_request / after_request).
 """
 
 import pytest
-from flask import Response, request, url_for
+from flask import Blueprint, Flask, url_for
 
-from flask_mvc.middlewares.callback import Callback as CallbackMiddleware
-from tests.app.controllers.callbacks_controller import CallbacksController
+from flask_mvc.extension import _bind_callbacks
 
-# Callback Middleware Tests
+
+def make_client(controller_cls, actions=("index", "show", "edit")):
+    """Create a minimal app with a 'things' blueprint and bound controller hooks."""
+    app = Flask(__name__)
+    controller = controller_cls()
+    blueprint = Blueprint("things", __name__)
+    for action in actions:
+        blueprint.add_url_rule(
+            f"/{action}", endpoint=action, view_func=getattr(controller, action)
+        )
+    _bind_callbacks(blueprint, controller)
+    app.register_blueprint(blueprint)
+    return app.test_client()
+
+
+# Comportamento dos hooks
 
 
 def test_before_request_execution(client):
@@ -28,101 +42,9 @@ def test_after_request_execution(client):
     assert response.text == "hello"
 
 
-def test_callback_middleware_initialization(app):
-    """Test callback middleware initialization."""
-    controller = CallbacksController()
-    middleware = CallbackMiddleware(app, "callbacks", controller)
-
-    assert middleware.app == app
-    assert middleware.controller_name == "callbacks"
-    assert middleware.controller == controller
-
-
-def test_get_hook_method_existing(app):
-    """Test retrieving existing hook method."""
-    controller = CallbacksController()
-    middleware = CallbackMiddleware(app, "callbacks", controller)
-
-    hook_method, actions = middleware.get_hook_method("before_request")
-
-    assert hook_method is not False
-    assert actions == ["index"]
-    assert callable(hook_method)
-
-
-def test_get_hook_method_nonexistent(app):
-    """Test retrieving non-existent hook method."""
-    controller = CallbacksController()
-    middleware = CallbackMiddleware(app, "callbacks", controller)
-
-    hook_method, actions = middleware.get_hook_method("nonexistent_hook")
-
-    assert hook_method is False
-    assert actions is False
-
-
-def test_actions_parsing(app):
-    """Test action string parsing."""
-    controller = CallbacksController()
-    middleware = CallbackMiddleware(app, "callbacks", controller)
-
-    actions = middleware.actions({"actions": "index"})
-    assert actions == ["index"]
-
-    actions = middleware.actions({"actions": "index show edit"})
-    assert actions == ["index", "show", "edit"]
-
-
-def test_hook_execution_with_matching_endpoint(app):
-    """Test hook execution when endpoint matches."""
-    controller = CallbacksController()
-    middleware = CallbackMiddleware(app, "callbacks", controller)
-
-    with app.test_request_context("/callbacks"):
-        # Mock the request to simulate endpoint matching
-        from unittest.mock import patch
-
-        with patch("flask.request") as mock_request:
-            mock_request.endpoint = "callbacks.index"
-
-            executed = []
-
-            def mock_hook():
-                executed.append("called")
-
-            middleware.execute_hook(mock_hook, ["index"])
-            assert len(executed) == 1
-
-
-def test_hook_execution_without_matching_endpoint(app):
-    """Test hook execution when endpoint doesn't match."""
-    controller = CallbacksController()
-    middleware = CallbackMiddleware(app, "callbacks", controller)
-
-    with app.test_request_context("/other"):
-        # Mock the request to simulate endpoint not matching
-        from unittest.mock import patch
-
-        with patch("flask.request") as mock_request:
-            mock_request.endpoint = "other.index"
-
-            executed = []
-
-            def mock_hook():
-                executed.append("called")
-
-            middleware.execute_hook(mock_hook, ["index"])
-            assert len(executed) == 0
-
-
-# Callback Configuration Tests
-
-
-def test_multiple_actions_before_request(app):
-    """Test before_request callback with multiple actions."""
-
-    class MultiActionController:
-        before_request = dict(callback="setup", actions="index show edit")
+def test_before_request_runs_for_every_listed_action():
+    class Things:
+        before_request = dict(callback="setup", actions="index show")
 
         def setup(self):
             self.data = "initialized"
@@ -130,117 +52,86 @@ def test_multiple_actions_before_request(app):
         def index(self):
             return getattr(self, "data", "not initialized")
 
-        def show(self, id):
-            return getattr(self, "data", "not initialized")
+        show = edit = index
 
-        def edit(self, id):
-            return getattr(self, "data", "not initialized")
+    client = make_client(Things)
 
-    controller = MultiActionController()
-    middleware = CallbackMiddleware(app, "multi", controller)
-
-    _, actions = middleware.get_hook_method("before_request")
-    assert actions == ["index", "show", "edit"]
+    assert client.get("/index").text == "initialized"
+    assert client.get("/show").text == "initialized"
 
 
-def test_after_request_with_response_modification(app):
-    """Test after_request callback modifying response."""
+def test_before_request_skips_unlisted_actions():
+    class Things:
+        before_request = dict(callback="setup", actions="index")
 
-    class ResponseModifierController:
-        after_request = dict(callback="modify_response", actions="index")
+        def setup(self):
+            self.data = "initialized"
 
         def index(self):
-            return "original response"
+            return getattr(self, "data", "not initialized")
 
-        def modify_response(self, response):
+        show = edit = index
+
+    client = make_client(Things, actions=("show", "index"))
+
+    assert client.get("/show").text == "not initialized"
+
+
+def test_after_request_modifies_response_only_for_listed_actions():
+    class Things:
+        after_request = dict(callback="stamp", actions="index")
+
+        def stamp(self, response):
             response.headers["Custom-Header"] = "modified"
-            return response
 
-    controller = ResponseModifierController()
-    middleware = CallbackMiddleware(app, "modifier", controller)
-
-    with app.test_request_context("/modifier"):
-        # Mock the request to simulate endpoint matching
-        from unittest.mock import patch
-
-        with patch("flask.request") as mock_request:
-            mock_request.endpoint = "modifier.index"
-
-            response = Response("test")
-
-            hook_method, actions = middleware.get_hook_method("after_request")
-            hook_method(response)
-
-            assert response.headers.get("Custom-Header") == "modified"
-
-
-# Edge Cases Tests
-
-
-def test_callback_without_actions(app):
-    """Test callback configuration without actions."""
-
-    class NoActionsController:
-        before_request = dict(callback="setup", actions="")
-
-        def setup(self):
-            pass
-
-    controller = NoActionsController()
-    middleware = CallbackMiddleware(app, "no_actions", controller)
-
-    _, actions = middleware.get_hook_method("before_request")
-    assert actions == [] or actions == [""]
-
-
-def test_callback_with_invalid_method(app):
-    """Test callback configuration with invalid method."""
-
-    class InvalidMethodController:
-        before_request = dict(callback="nonexistent_method", actions="index")
-
-        def setup(self):
-            pass
-
-    controller = InvalidMethodController()
-    middleware = CallbackMiddleware(app, "invalid", controller)
-
-    try:
-        hook_method, actions = middleware.get_hook_method("before_request")
-        assert actions == ["index"]
-    except AttributeError:
-        pytest.skip("Expected behavior - method doesn't exist")
-
-
-def test_empty_controller(app):
-    """Test middleware with controller that has no callbacks."""
-
-    class EmptyController:
         def index(self):
-            return "empty"
+            return "original"
 
-    controller = EmptyController()
-    middleware = CallbackMiddleware(app, "empty", controller)
+        show = edit = index
 
-    hook_method, actions = middleware.get_hook_method("before_request")
-    assert hook_method is False
-    assert actions is False
+    client = make_client(Things)
+
+    assert client.get("/index").headers["Custom-Header"] == "modified"
+    assert "Custom-Header" not in client.get("/show").headers
 
 
-def test_malformed_callback_config(app):
-    """Test malformed callback configuration."""
+def test_controller_without_callbacks_is_untouched():
+    class Things:
+        def index(self):
+            return "plain"
 
-    class MalformedController:
+        show = edit = index
+
+    assert make_client(Things).get("/index").text == "plain"
+
+
+def test_missing_callback_method_fails_at_startup():
+    class Things:
+        before_request = dict(callback="nope", actions="index")
+
+        def index(self):
+            return ""
+
+        show = edit = index
+
+    with pytest.raises(AttributeError):
+        make_client(Things)
+
+
+def test_malformed_callback_config_fails_at_startup():
+    class Things:
         before_request = "not a dict"
 
-    controller = MalformedController()
-    middleware = CallbackMiddleware(app, "malformed", controller)
+        def index(self):
+            return ""
 
-    with pytest.raises((TypeError, KeyError, AttributeError)):
-        middleware.get_hook_method("before_request")
+        show = edit = index
+
+    with pytest.raises(TypeError):
+        make_client(Things)
 
 
-# Integration Tests
+# Integration with the test app (real routes)
 
 
 def test_full_request_cycle_with_callbacks(client):

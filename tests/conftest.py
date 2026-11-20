@@ -5,7 +5,7 @@ Comprehensive test configuration with improved fixtures and utilities.
 import pytest
 from splinter import Browser
 
-from flask_mvc.middlewares.base_model import BaseModel
+from flask_mvc.model import BaseModel
 from tests.app import create_app, db
 from tests.app.models.message import Message
 
