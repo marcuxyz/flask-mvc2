@@ -8,9 +8,15 @@ import pytest
 from flask import url_for
 
 from flask_mvc import Router
-from flask_mvc.middlewares.router import Router
 
 # Router System Tests
+
+
+def by_controller(routes):
+    grouped = {}
+    for route in routes:
+        grouped.setdefault(route.controller, []).append(route)
+    return grouped
 
 
 def test_blueprints_registration(client):
@@ -131,55 +137,55 @@ def test_namespace_endpoint_naming(client):
 
 def test_get_route_registration():
     """Test GET route registration."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.get("/test", "test#index")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert "test" in routes
-    assert routes["test"][0].method == ["GET"]
+    assert routes["test"][0].methods == ["GET"]
     assert routes["test"][0].path == "/test"
     assert routes["test"][0].action == "index"
 
 
 def test_post_route_registration():
     """Test POST route registration."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.post("/test", "test#create")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert "test" in routes
-    assert routes["test"][0].method == ["POST"]
+    assert routes["test"][0].methods == ["POST"]
     assert routes["test"][0].action == "create"
 
 
 def test_put_route_registration():
     """Test PUT route registration."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.put("/test/<id>", "test#update")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert "test" in routes
-    assert routes["test"][0].method == ["PUT", "PATCH"]
+    assert routes["test"][0].methods == ["PUT", "PATCH"]
     assert routes["test"][0].action == "update"
 
 
 def test_delete_route_registration():
     """Test DELETE route registration."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.delete("/test/<id>", "test#destroy")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert "test" in routes
-    assert routes["test"][0].method == ["DELETE"]
+    assert routes["test"][0].methods == ["DELETE"]
     assert routes["test"][0].action == "destroy"
 
 
 def test_all_routes_registration():
     """Test that Router.all() creates all RESTful routes."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.all("products")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert "products" in routes
 
     assert len(routes["products"]) == 7
@@ -191,10 +197,10 @@ def test_all_routes_registration():
 
 def test_all_routes_with_only_filter():
     """Test Router.all() with only parameter."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.all("products", only="index show")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert "products" in routes
     assert len(routes["products"]) == 2
 
@@ -207,31 +213,41 @@ def test_all_routes_with_only_filter():
 
 def test_multiple_routes_same_controller():
     """Test multiple routes for the same controller."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     Router.get("/users", "users#index")
     Router.get("/users/active", "users#active")
     Router.post("/users", "users#create")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert len(routes["users"]) == 3
 
 
 def test_namespace_path_concatenation():
     """Test that namespace paths are properly concatenated."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     api = Router.namespace("/api")
     api.get("/test", "test#index")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert routes["test"][0].path == "/api/test"
 
 
 def test_nested_namespace_paths():
     """Test deeply nested namespace paths."""
-    Router.ROUTES.clear()
+    Router.routes.clear()
     api = Router.namespace("/api")
     v1 = api.namespace("/v1")
     v1.get("/test", "test#index")
 
-    routes = Router._method_route()
+    routes = by_controller(Router.routes)
     assert routes["test"][0].path == "/api/v1/test"
+
+
+def test_all_rejects_unknown_action():
+    with pytest.raises(ValueError, match="Unknown action"):
+        Router.all("products", only="index fly")
+
+
+def test_resource_must_be_controller_hash_action():
+    with pytest.raises(ValueError, match="controller#action"):
+        Router.get("/x", "no_action_here")
